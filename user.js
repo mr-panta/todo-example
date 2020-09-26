@@ -1,7 +1,7 @@
 const userDB = {};
 
 const login = (req, res) => {
-    const {user_id} = req.body
+    const { user_id } = req.body
     const data = {
         is_new: !userDB[user_id],
     }
