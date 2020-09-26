@@ -1,19 +1,20 @@
 const express = require('express')
+const bodyParser = require('body-parser');
 const app = express()
-const port = 8000
+const port = 3000
 
-let link = '?question=answer';
-// app.get('/get-time', (req, res) => {
-//   const data = {
-//     time: Date.now()
-//   }
-//   res.send(data);
-// })
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.raw());
 
-app.get('/get-time', (req, res) => {
-    res.send(req.query);
-  })
+app.post('/example', (req, res) => {
+    const data = {
+        body: req.body,
+        query: req.query,
+    }
+    res.send(data);
+})
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+    console.log(`Example app listening at http://localhost:${port}`)
 })
