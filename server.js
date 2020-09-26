@@ -1,31 +1,20 @@
-const http = require('http');
-const querystring = require('querystring');
+const express = require('express')
+const bodyParser = require('body-parser');
+const app = express()
+const port = 3000
 
-const port = 8080;
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.raw());
 
-let getTime = (req, res, query) => {
+app.post('/example', (req, res) => {
     const data = {
-        time: Date.now(),
-    };
-    data.output = query.input * 2;
-    res.write(JSON.stringify(data));
-    res.end();
-};
-
-let httpHandler = (req, res) => {
-    // Prepare
-    const params = req.url.split('?');
-    let urlObj = null;
-    if (params.length > 1) {
-        urlObj = querystring.parse(params[1]);
+        body: req.body,
+        query: req.query,
     }
-    // Routing
-    if (req.method === "GET" && params[0] === "/get-time") {
-        getTime(req, res, urlObj);
-    } else {
-        res.write("not found");
-        res.end();
-    }
-};
+    res.send(data);
+})
 
-http.createServer(httpHandler).listen(port);
+app.listen(port, () => {
+    console.log(`Example app listening at http://localhost:${port}`)
+})
