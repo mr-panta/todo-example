@@ -1,22 +1,19 @@
-let http = require('http');
+const express = require('express')
+const app = express()
+const port = 8000
 
-const port = 8080;
+let link = '?question=answer';
+// app.get('/get-time', (req, res) => {
+//   const data = {
+//     time: Date.now()
+//   }
+//   res.send(data);
+// })
 
-let getTime = (req, res) => {
-    const data = {
-        time: Date.now(),
-    };
-    res.write(JSON.stringify(data));
-    res.end();
-};
+app.get('/get-time', (req, res) => {
+    res.send(req.query);
+  })
 
-let httpHandler = (req, res) => {
-    if (req.method === "GET" && req.url === "/get-time") {
-        getTime(req, res);
-    } else {
-        res.write("not found");
-        res.end();
-    }
-};
-
-http.createServer(httpHandler).listen(port);
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
+})
