@@ -1,5 +1,6 @@
 const userDB = {};
 
+
 const login = (req, res) => {
     const { user_id } = req.body
     const data = {
@@ -8,6 +9,8 @@ const login = (req, res) => {
     userDB[user_id] = true
     res.send(data)
 }
+
+
 
 module.exports = {
     login,
