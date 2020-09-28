@@ -1,7 +1,7 @@
 const mysql = require('mysql')
 
 const conn = mysql.createConnection({
-    host: "127.0.0.1",
+    host: "localhost",
     user: "root",
     password: "12345678",
     database: "todo_database",
@@ -9,14 +9,14 @@ const conn = mysql.createConnection({
 
 const login = (req, res) => {
     const { username } = req.body
-    conn.query('SELECT `user_id`, `username` FROM `user_table` WHERE `username` = ?', [username], (err, results) => {
+    conn.query('SELECT `user_id` FROM `user_table` WHERE `username` = ?', [username], (err, rows) => {
         if (err) {
             return res.send({
                 valid: false,
                 error: err,
             })
         }
-        if (results.length == 0) {
+        if (rows.length == 0) {
             // Create new row
             conn.query('INSERT INTO `user_table` (`username`) VALUES (?)', [username], (err, insertResult) => {
                 if (err) {
@@ -33,7 +33,7 @@ const login = (req, res) => {
         } else {
             return res.send({
                 valid: true,
-                user_id: results[0].user_id,
+                user_id: rows[0].user_id,
             })
         }
     })
