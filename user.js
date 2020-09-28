@@ -7,36 +7,37 @@ const conn = mysql.createConnection({
     database: "todo_database",
 })
 
-const login = (req, res) => {
-    const { username } = req.body
-    conn.query('SELECT `user_id` FROM `user_table` WHERE `username` = ?', [username], (err, rows) => {
+const dbQuery = (query, args) => new Promise((resolve, reject) => {
+    conn.query(query, args, (err, result) => {
         if (err) {
-            return res.send({
-                valid: false,
-                error: err,
-            })
-        }
-        if (rows.length == 0) {
-            // Create new row
-            conn.query('INSERT INTO `user_table` (`username`) VALUES (?)', [username], (err, insertResult) => {
-                if (err) {
-                    return res.send({
-                        valid: false,
-                        error: err,
-                    })
-                }
-                return res.send({
-                    valid: true,
-                    user_id: insertResult.insertId,
-                })
-            })
+            reject(err)
         } else {
-            return res.send({
-                valid: true,
-                user_id: rows[0].user_id,
-            })
+            resolve(result)
         }
     })
+})
+
+const login = async (req, res) => {
+    try {
+        const { username } = req.body;
+        const rows = await dbQuery('SELECT `user_id` FROM `user_table` WHERE `username` = ?', [username])
+        if (!rows.length) {
+            const insertResult = await dbQuery('INSERT INTO `user_table` (`username`) VALUES (?)', [username]);
+            return res.send({
+                valid: true,
+                user_id: insertResult.insertId,
+            })
+        }
+        return res.send({
+            valid: true,
+            user_id: rows[0].user_id,
+        })
+    } catch (err) {
+        res.send({
+            valid: false,
+            error: err,
+        })
+    }
 }
 
 module.exports = {
