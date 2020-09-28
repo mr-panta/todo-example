@@ -22,7 +22,6 @@ app.post('/example', (req, res) => {
 app.post('/login', user.login);
 
 // Todo API
-// TODO: Aong
 app.post('/addtodo', todo.addTodo);
 
 // Edit todo
@@ -38,9 +37,8 @@ app.post('/undotodo', todo.undoTodo);
 app.post('/deletetodo', todo.deleteTodo);
 
 // Get todo
-app.post('/gettodo', todo.getTodo);
+app.get('/gettodo', todo.getTodo);
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 })
-
