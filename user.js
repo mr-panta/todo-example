@@ -1,11 +1,13 @@
 const mysql = require('mysql')
+const config = require('./config.js');
 
 const conn = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "wasdwasd",
-    database: "todo_database",
-})
+    host: config.dbHost,
+    user: config.dbUser,
+    password: config.dbPassword,
+    database: config.dbName,
+});
+
 
 const login = (req, res) => {
     const { username } = req.body

@@ -1,15 +1,16 @@
 const mysql = require('mysql');
+const config = require('./config.js');
 
 const conn = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "wasdwasd",
-    database: "todo_database",
+    host: config.dbHost,
+    user: config.dbUser,
+    password: config.dbPassword,
+    database: config.dbName,
 });
 
 const addTodo = (req, res) => {
     const { detail, user_id } = req.body;
- 
+
     conn.query('SELECT `user_id` FROM `user_table` WHERE `user_id` = ?', [user_id], (err, rows) => {
         if (err) {
             return res.send({
@@ -17,7 +18,7 @@ const addTodo = (req, res) => {
                 error: err,
             });
         }
-        if (rows.length == 0){
+        if (rows.length == 0) {
             return res.send({
                 valid: false
             });
@@ -69,7 +70,7 @@ const addTodo = (req, res) => {
 //         }
 //     });
 // }
-function checkId(user_id, todo_id){
+function checkId(user_id, todo_id) {
     return new Promise((resolve, reject) => {
         conn.query('SELECT * FROM `todo_table` WHERE `user_id` = ? AND `todo_id` = ?', [user_id, todo_id], (err, rows) => {
             if (err) {
@@ -78,17 +79,17 @@ function checkId(user_id, todo_id){
                     error: err,
                 });
             }
-            if (rows.length == 0){
+            if (rows.length == 0) {
                 return res.send({
                     valid: false
                 });
-            } 
+            }
         });
-        resolve();    
-    });   
+        resolve();
+    });
 }
 
-function updateTodo(user_id, todo_id, detail){
+function updateTodo(user_id, todo_id, detail) {
     return new Promise((resolve, reject) => {
         conn.query('UPDATE `todo_table` SET `detail` = ? WHERE `todo_id` = ? AND `user_id` = ?', [detail, todo_id, user_id], (err, insertResult) => {
             if (err) {
@@ -101,16 +102,16 @@ function updateTodo(user_id, todo_id, detail){
                 valid: true
             });
         });
-        resolve();    
-    });   
+        resolve();
+    });
 }
 
 const editTodo = async (req, res) => {
     const { detail, user_id, todo_id } = req.body;
-    try{
-        await checkId(user_id, todo_id);     
+    try {
+        await checkId(user_id, todo_id);
         await updateTodo(user_id, todo_id, detail);
-    } catch (error){
+    } catch (error) {
         console.error(error);
     }
 }
@@ -118,7 +119,7 @@ const editTodo = async (req, res) => {
 
 const doneTodo = (req, res) => {
     const { user_id, todo_id } = req.body;
-    
+
     conn.query('SELECT * FROM `todo_table` WHERE `user_id` = ? AND `todo_id` = ? AND `status` = false', [user_id, todo_id], (err, rows) => {
         if (err) {
             return res.send({
@@ -126,7 +127,7 @@ const doneTodo = (req, res) => {
                 error: err,
             });
         }
-        if (rows.length == 0){
+        if (rows.length == 0) {
             return res.send({
                 valid: false
             });
@@ -155,7 +156,7 @@ const undoTodo = (req, res) => {
                 error: err,
             });
         }
-        if (rows.length == 0){
+        if (rows.length == 0) {
             return res.send({
                 valid: false
             });
@@ -184,7 +185,7 @@ const deleteTodo = (req, res) => {
                 error: err,
             });
         }
-        if (rows.length == 0){
+        if (rows.length == 0) {
             return res.send({
                 valid: false
             });
@@ -195,7 +196,7 @@ const deleteTodo = (req, res) => {
             });
         }
     });
-    
+
 }
 
 const getTodo = (req, res) => {
@@ -207,7 +208,7 @@ const getTodo = (req, res) => {
                 error: err,
             });
         }
-        if (rows.length == 0){
+        if (rows.length == 0) {
             return res.send({
                 valid: false
             });
