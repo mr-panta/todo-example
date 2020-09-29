@@ -1,113 +1,230 @@
-const todoDB = [];
+const mysql = require('mysql');
+
+const conn = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "wasdwasd",
+    database: "todo_database",
+});
 
 const addTodo = (req, res) => {
     const { detail, user_id } = req.body;
-    const data = {
-        todo_id: todoDB.length + 1,
-        user_id,
-        detail,
-        status: false
-    };
-    todoDB.push(data);
-    res.send({
-        todo_id: data.todo_id,
+ 
+    conn.query('SELECT `user_id` FROM `user_table` WHERE `user_id` = ?', [user_id], (err, rows) => {
+        if (err) {
+            return res.send({
+                valid: false,
+                error: err,
+            });
+        }
+        if (rows.length == 0){
+            return res.send({
+                valid: false
+            });
+
+        } else {
+            conn.query('INSERT INTO `todo_table` (`user_id`, `detail`, `status`) VALUES (?, ?, FALSE)', [user_id, detail], (err, insertResult) => {
+                if (err) {
+                    return res.send({
+                        valid: false,
+                        error: err,
+                    });
+                }
+                return res.send({
+                    valid: true,
+                    todo_id: insertResult.insertId,
+                });
+            });
+        }
+    });
+
+}
+
+// const editTodo = (req, res) => {
+//     const { detail, user_id, todo_id } = req.body;
+
+//     conn.query('SELECT * FROM `todo_table` WHERE `user_id` = ? AND `todo_id` = ?', [user_id, todo_id], (err, rows) => {
+//         if (err) {
+//             return res.send({
+//                 valid: false,
+//                 error: err,
+//             });
+//         }
+//         if (rows.length == 0){
+//             return res.send({
+//                 valid: false
+//             });
+//         } else {
+//             conn.query('UPDATE `todo_table` SET `detail` = ? WHERE `todo_id` = ? AND `user_id` = ?', [detail, todo_id, user_id], (err, insertResult) => {
+//                 if (err) {
+//                     return res.send({
+//                         valid: false,
+//                         error: err,
+//                     });
+//                 }
+//                 return res.send({
+//                     valid: true
+//                 });
+//             });
+//         }
+//     });
+// }
+function checkId(user_id, todo_id){
+    return new Promise((resolve, reject) => {
+        conn.query('SELECT * FROM `todo_table` WHERE `user_id` = ? AND `todo_id` = ?', [user_id, todo_id], (err, rows) => {
+            if (err) {
+                return res.send({
+                    valid: false,
+                    error: err,
+                });
+            }
+            if (rows.length == 0){
+                return res.send({
+                    valid: false
+                });
+            } 
+        });
+        resolve();    
+    });   
+}
+
+function updateTodo(user_id, todo_id, detail){
+    return new Promise((resolve, reject) => {
+        conn.query('UPDATE `todo_table` SET `detail` = ? WHERE `todo_id` = ? AND `user_id` = ?', [detail, todo_id, user_id], (err, insertResult) => {
+            if (err) {
+                return res.send({
+                    valid: false,
+                    error: err,
+                });
+            }
+            return res.send({
+                valid: true
+            });
+        });
+        resolve();    
+    });   
+}
+
+const editTodo = async (req, res) => {
+    const { detail, user_id, todo_id } = req.body;
+    try{
+        await checkId(user_id, todo_id);     
+        await updateTodo(user_id, todo_id, detail);
+    } catch (error){
+        console.error(error);
+    }
+}
+
+
+const doneTodo = (req, res) => {
+    const { user_id, todo_id } = req.body;
+    
+    conn.query('SELECT * FROM `todo_table` WHERE `user_id` = ? AND `todo_id` = ? AND `status` = false', [user_id, todo_id], (err, rows) => {
+        if (err) {
+            return res.send({
+                valid: false,
+                error: err,
+            });
+        }
+        if (rows.length == 0){
+            return res.send({
+                valid: false
+            });
+        } else {
+            conn.query('UPDATE `todo_table` SET `status` = true WHERE `todo_id` = ? AND `user_id` = ?', [todo_id, user_id], (err, insertResult) => {
+                if (err) {
+                    return res.send({
+                        valid: false,
+                        error: err,
+                    });
+                }
+                return res.send({
+                    valid: true
+                });
+            });
+        }
     });
 }
 
-const editTodo = (req, res) => {
-    const { detail, user_id, todo_id } = req.body;
-    let valid = false;
-    for (let i = 0; i < todoDB.length; i++) {
-        if (todoDB[i].user_id == user_id && todoDB[i].todo_id == todo_id) {
-            todoDB[i].detail = detail;
-            valid = true;
-            break;
-        }
-    }
-    if (valid) {
-        res.send({
-            valid
-        });
-    } else {
-        res.send('Error Edit todo');
-    }
-}
-
-const doneTodo = (req, res) => {
-    let valid = false;
-    const { user_id, todo_id } = req.body;
-    for (let i = 0; i < todoDB.length; i++) {
-        if (todoDB[i].user_id == user_id && todoDB[i].todo_id == todo_id) {
-            if (todoDB[i].status == false) {
-                todoDB[i].status = true;
-                valid = true;
-                break;
-            }
-        }
-    }
-    if (valid) {
-        res.send(valid);
-    } else {
-        res.send('Error Done todo');
-    }
-}
-
 const undoTodo = (req, res) => {
-    let valid = false;
     const { user_id, todo_id } = req.body;
-    for (let i = 0; i < todoDB.length; i++) {
-        if (todoDB[i].user_id == user_id && todoDB[i].todo_id == todo_id) {
-            if (todoDB[i].status == true) {
-                todoDB[i].status = false;
-                valid = true;
-                break;
-            }
+    conn.query('SELECT * FROM `todo_table` WHERE `user_id` = ? AND `todo_id` = ? AND `status` = true', [user_id, todo_id], (err, rows) => {
+        if (err) {
+            return res.send({
+                valid: false,
+                error: err,
+            });
         }
-    }
-    if (valid) {
-        res.send(valid);
-    } else {
-        res.send('Error Undo todo');
-    }
+        if (rows.length == 0){
+            return res.send({
+                valid: false
+            });
+        } else {
+            conn.query('UPDATE `todo_table` SET `status` = false WHERE `todo_id` = ? AND `user_id` = ?', [todo_id, user_id], (err, insertResult) => {
+                if (err) {
+                    return res.send({
+                        valid: false,
+                        error: err,
+                    });
+                }
+                return res.send({
+                    valid: true
+                });
+            });
+        }
+    });
 }
 
 const deleteTodo = (req, res) => {
     const { user_id, todo_id } = req.body;
-    let valid = false;
-    for (let i = 0; i < todoDB.length; i++) {
-        if (todoDB[i].user_id == user_id && todoDB[i].todo_id == todo_id) {
-            todoDB.splice(i, 1);
-            valid = true;
-            break;
+    conn.query('SELECT * FROM `todo_table` WHERE `user_id` = ? AND `todo_id` = ?', [user_id, todo_id], (err, rows) => {
+        if (err) {
+            return res.send({
+                valid: false,
+                error: err,
+            });
         }
-    }
-    if (valid) {
-        res.send(valid);
-    } else {
-        res.send('Error Delete todo');
-    }
+        if (rows.length == 0){
+            return res.send({
+                valid: false
+            });
+        } else {
+            return res.send({
+                rows,
+                valid: true
+            });
+        }
+    });
+    
 }
 
 const getTodo = (req, res) => {
     const { user_id } = req.query;
-    let valid = false;
-    let data = [];
-    for (let i = 0; i < todoDB.length; i++) {
-        if (todoDB[i].user_id == user_id) {
-            data.push(todoDB[i]);
-            valid = true;
+    conn.query('SELECT * FROM `todo_table` WHERE `user_id` = ?', [user_id, todo_id], (err, rows) => {
+        if (err) {
+            return res.send({
+                valid: false,
+                error: err,
+            });
         }
-    }
-    if (valid) {
-        res.send({
-            data,
-            valid,
-        });
-    } else {
-        res.send({
-            valid,
-        });
-    }
+        if (rows.length == 0){
+            return res.send({
+                valid: false
+            });
+        } else {
+            conn.query('UPDATE `todo_table` SET `status` = false WHERE `todo_id` = ? AND `user_id` = ?', [todo_id, user_id], (err, insertResult) => {
+                if (err) {
+                    return res.send({
+                        valid: false,
+                        error: err,
+                    });
+                }
+                return res.send({
+                    valid: true
+                });
+            });
+        }
+    });
 }
 
 module.exports = {
