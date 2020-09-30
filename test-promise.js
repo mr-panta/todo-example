@@ -12,7 +12,9 @@ conn.query('SELECT * FROM `user_table`', (err, rows) => {
     // console.log(err, rows);
 });
 
-// TODO: write `dbQuery` function that returns new promise
+const dbQuery = (query, args) => {
+    // TODO: write `dbQuery` function that returns new promise
+};
 
 const testDB = async () => {
     try {
