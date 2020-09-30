@@ -1,9 +1,23 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mysql = require('mysql');
+
+const config = require('./config.js');
 const user = require('./user.js');
 const todo = require('./todo.js');
-const config = require('./config.js');
+
 const app = express();
+const conn = mysql.createConnection({
+    host: config.dbHost,
+    user: config.dbUser,
+    password: config.dbPassword,
+    database: config.dbName,
+});
+
+app.use((req, res, next) => {
+    req.dbConn = conn;
+    next();
+});
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());

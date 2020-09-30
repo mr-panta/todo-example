@@ -1,15 +1,5 @@
-const mysql = require('mysql')
-const config = require('./config.js');
-
-const conn = mysql.createConnection({
-    host: config.dbHost,
-    user: config.dbUser,
-    password: config.dbPassword,
-    database: config.dbName,
-});
-
-
 const login = (req, res) => {
+    const conn = req.dbConn;
     const { username } = req.body
     conn.query('SELECT `user_id` FROM `user_table` WHERE `username` = ?', [username], (err, rows) => {
         if (err) {
