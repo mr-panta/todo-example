@@ -14,11 +14,19 @@ conn.query('SELECT * FROM `user_table`', (err, rows) => {
 
 const dbQuery = (query, args) => {
     // TODO: write `dbQuery` function that returns new promise
+    return new Promise((resolve, reject) => {
+        conn.query(query, args, (err, rows) => {
+            if (err){
+                reject(err);
+            }
+            resolve(rows);
+        });
+    });
 };
 
 const testDB = async () => {
     try {
-        const rows = await dbQuery('SELECT * FROM `user_table` WHERE `user_id` > ?', [4])
+        const rows = await dbQuery('SELECT * FROM `user_table` WHERE `user_id` > ?', [0])
         console.log(rows);
     } catch (err) {
         console.log(err);
