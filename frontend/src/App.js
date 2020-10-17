@@ -1,53 +1,28 @@
-import React, { Component } from 'react';
-import { render } from 'react-dom';
+import React, { Component } from 'react'
+import Home from './pages/home'
 
 class App extends Component { // stateful component
   
   constructor() {
     super()
     this.state = {
-      price: 100,
+      page: "home",
     }
-    // this.handlePriceChange = this.handlePriceChange.bind(this);
+
+    this.setPage = this.setPage.bind(this);
   }
 
-  // handlePriceChange(event) {
-  //   let price = event.target.value
-  //   this.setState({
-  //     price: price
-  //   })
-  // }
+  setPage(page) {
+    this.setState({ page })
+  }
 
   render() {
     return (
       <div>      
-        <PriceInput
-          setPrice={newPrice => this.setState({ price: newPrice })}
-          price={this.state.price}
-        />
-        <PriceBox
-          currency="บาท"
-          price={this.state.price}
-        />
+        {this.state.page === "home" && <Home setPage={this.setPage} />}
       </div>
     )
   }
 }
 
-const PriceInput = (props) => {
-  return (
-    <input
-      type="number"
-      onChange={event => props.setPrice(event.target.value)}
-      value={props.price}
-    />
-  )
-}
-
-const PriceBox = (props) => { // stateless component
-  return (
-    <div>{props.price} {props.currency}</div>
-  )
-}
-
-export default App;
+export default App
