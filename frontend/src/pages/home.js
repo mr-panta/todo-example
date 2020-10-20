@@ -9,6 +9,7 @@ class Home extends Component {
         super()
         this.state = {
             username: "",
+            numbers: [1, 2, 3],
         }
     }
 
@@ -28,6 +29,15 @@ class Home extends Component {
                         label="LOGIN"
                         onClick={() => this.props.setPage("todo")}
                     />
+                    <div>
+                        {this.state.numbers.map((value, index) => {
+                            return (
+                                <div key={index}>
+                                    <Label >{value}</Label>
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
             </div> 
         )
